@@ -1155,6 +1155,77 @@ SLInitHook.x64=1
 SLInitOffset.x64=5DBD0
 SLInitFunc.x64=New_CSLQuery_Initialize
 
+[6.3.9600.18730]
+; Patch CEnforcementCore::GetInstanceOfTSLicense
+; .text:100B35CB                 call    ?IsLicenseTypeLocalOnly@CSLQuery@@SGJAAU_GUID@@PAH@Z ; CSLQuery::IsLicenseTypeLocalOnly(_GUID &,int *)
+; .text:100B35D0                 test    eax, eax
+; .text:100B35D2                 js      short loc_100B35EF
+; .text:100B35D4                 cmp     [ebp+var_C], 0
+; .text:100B35D8                 jz      short loc_100B35EF <- jmp
+LocalOnlyPatch.x86=1
+LocalOnlyOffset.x86=B35D8
+LocalOnlyCode.x86=jmpshort
+; .text:000000018008B2D4          cmp     [rsp+58h+arg_18], 0
+; .text:000000018008B2D9          jz      loc_180025C39 <- nop + jmp
+LocalOnlyPatch.x64=1
+LocalOnlyOffset.x64=8B2D9
+LocalOnlyCode.x64=nopjmp
+; Patch CSessionArbitrationHelper::IsSingleSessionPerUserEnabled
+; .text:100370F1                 lea     eax, [esp+150h+VersionInformation]
+; .text:100370F5                 inc     ebx <- nop
+; .text:100370F6                 mov     [edi], ebx
+; .text:100370F8                 push    eax             ; lpVersionInformation
+; .text:100370F9                 call    ds:__imp__GetVersionExW@4 ; GetVersionExW(x)
+SingleUserPatch.x86=1
+SingleUserOffset.x86=370F5
+SingleUserCode.x86=nop
+; .text:0000000180033CE3          lea     rcx, [rsp+190h+VersionInformation] ; lpVersionInformation
+; .text:0000000180033CE8          mov     ebx, 1     <- 0
+; .text:0000000180033CED          mov     [rsp+190h+VersionInformation.dwOSVersionInfoSize], 11Ch
+; .text:0000000180033CF5          mov     [rdi], ebx
+; .text:0000000180033CF7          call    cs:__imp_GetVersionExW
+SingleUserPatch.x64=1
+SingleUserOffset.x64=33CE9
+SingleUserCode.x64=Zero
+; Patch CDefPolicy::Query
+; Original
+; .text:1003CFD9                 cmp     eax, [ecx+320h]
+; .text:1003CFDF                 jz      loc_1004A55F
+; Changed
+; .text:1003CFF9          mov     eax, 100h
+; .text:1003CFFE          mov     [ecx+320h], eax
+; .text:1003D004          nop
+DefPolicyPatch.x86=1
+DefPolicyOffset.x86=3CFD9
+DefPolicyCode.x86=CDefPolicy_Query_eax_ecx
+; Original
+; .text:0000000180045825          cmp     [rcx+63Ch], eax
+; .text:000000018004582B          jz      loc_180067704
+; Changed
+; .text:0000000180045825          mov     eax, 100h
+; .text:000000018004582A          mov     [rcx+638h], eax
+; .text:0000000180045830          nop
+DefPolicyPatch.x64=1
+DefPolicyOffset.x64=45825
+DefPolicyCode.x64=CDefPolicy_Query_eax_rcx
+; Hook CSLQuery::Initialize
+SLInitHook.x86=1
+SLInitOffset.x86=18308
+SLInitFunc.x86=New_CSLQuery_Initialize
+SLInitHook.x64=1
+SLInitOffset.x64=5DBC0
+SLInitFunc.x64=New_CSLQuery_Initialize
+
+[6.3.9600.18730-SLInit]
+bFUSEnabled.x86       =D3068
+lMaxUserSessions.x86  =D306C
+bAppServerAllowed.x86 =D3070
+bInitialized.x86      =D3074
+bMultimonAllowed.x86  =D3078
+bServerSku.x86        =D307C
+ulMaxDebugSessions.x86=D3080
+bRemoteConnAllowed.x86=D3084
+
 [6.4.9841.0]
 ; Patch CEnforcementCore::GetInstanceOfTSLicense
 ; .text:1009569B          call    sub_100B7EE5
